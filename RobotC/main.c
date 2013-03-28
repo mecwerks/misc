@@ -10,8 +10,9 @@
 #include "tests.c"
 
 task main () {
-	printf("Main Start\n");
-	MotorTest();
-	ArmTest();
-	printf("Main End\n");
+	FUNC_BEGIN("Main");
+	SensorWait( 73 );
+	MotorTest(port6, 100, 2);
+	MotorTestMultiple(port1, 5, 127, 2);
+	FUNC_END("Main");
 }

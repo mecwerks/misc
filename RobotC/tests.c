@@ -21,60 +21,48 @@
 #include "common.c"
 
 //============================
-// MotorTest
+// MotorTestMultiple
 //
 // Test every motor connected on 
-// port1 to (port1 + NUM_MOTORS - 1)
+// startPort to (startPort + numMotors - 1)
 //============================
-void MotorTest( void ) {
+void MotorTestMultiple( int startPort, int numMotors, int motorSpeed, float waitTime ) {
 	int i;
 
-	printf("MotorTest Start\n");
+	FUNC_BEGIN("MotorTestMultiple");
 
-	SensorWait( in1, 1 );
+	if (waitTime < 1)
+		printf("WARNING: waitTime is lower than 1 second: %f\n", waitTime);
 
-	for (i = 0; i < NUM_MOTORS; i++)
-		motor[port1 + i] = MOTOR_FULL;
+	for (i = 0; i < numMotors; i++)
+		Motor(startPort + i, motorSpeed);
 
-	SensorWait( in1, 1 );
+	wait( waitTime );
 
-	for (i = 0; i < NUM_MOTORS; i++)
-		motor[port1 + i] = MOTOR_FULL_REVERSE;
+	for (i = 0; i < numMotors; i++)
+		Motor(startPort + i,  MOTOR_OFF);
 
-	SensorWait( in1, 1 );
-
-	for (i = 0; i < NUM_MOTORS; i++)
-		motor[port1 + i] = MOTOR_OFF;
-
-	printf("MotorTest End\n");
+	FUNC_END("MotorTestMultiple");
 }
 
 //=============================
-// ArmTest
+// MotorTest
 //
-// Turn an arm connected to port 
-// ARM_PORT 90 degrees, then turn 
-// back 180 degrees, then return 
-// to original position.
+// Turn a motor connected to port 
+// armPort at a speed of armSpeed
+// for waitTime seconds
 //=============================
-void ArmTest( void ) {
-	printf("ArmTest Start\n");
+void MotorTest( int portNum, int motorSpeed, float waitTime ) {
+	FUNC_BEGIN("MotorTest");
 
-	motor[ARM_PORT] = ARM_SPEED;
-	SensorWait( dgtl1, 0.5 );
+	if (waitTime < 1)
+                printf("WARNING: waitTime is lower than 1 second: %f\n", waitTime);
+	
+	Motor(portNum, motorSpeed);
 
-	motor[ARM_PORT] = MOTOR_OFF;
-	wait( 1 );
+	wait( waitTime );
 
-	motor[ARM_PORT] = -ARM_SPEED;
-	SensorWait( dgtl2, 0.5 );
-
-	motor[ARM_PORT] = MOTOR_OFF;
-	wait( 1 );
-
-	motor[ARM_PORT] = ARM_SPEED;
-	wait1Msec( 700 );
-	motor[ARM_PORT] = MOTOR_OFF;
-
-	printf("ArmTest End\n");
+	Motor(portNum, MOTOR_OFF);
+	
+	FUNC_END("MotorTest");
 }
