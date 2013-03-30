@@ -16,6 +16,10 @@
 #define MOTOR_FULL		127		// motor speed 127 (max)
 #define MOTOR_FULL_REVERSE	-127		// motor speed -127 (max reverse)
 #define DEFAULT_SPEED           60              // default motor speed
+#define MAX_DIGITAL		dgtl6		// max digital input
+#define MAX_ANALOG		in6		// max analog input
+#define INPUT			0x01		// input flag
+#define OUTPUT			0x02		// output flag
 #define wait(x)		wait1Msec(x * 1000)	// wait x * 1000 milliseconds
                           			//      (converts seconds to milliseconds)
 #define FUNC_BEGIN(x)		printf("%s Start\n", x);
@@ -35,14 +39,14 @@
 // Functions can be put into any order if you declare
 // them like this ...
 //==========================================================
-void ArmTest( int portNum, int motorSpeed, float waitTime  );
+void MotorTest( int portNum, int motorSpeed, float waitTime  );
 void MotorTestMultiple( int startPort, int numMotors, int motorSpeed, float waitTime );
 void SensorWait( int sensorNum );
 void Motor( int portNum, int motorSpeed );
 int CapOutput( int outPower );
 int ValidatePort( int portNum );
-int ValidateAnalog( int analogIn );
-int ValidateDigital( int digitalIn );
+int ValidateInput( int inputNum );
+int NumtoIO( int ioNum, int IO );
 
 //============================
 // SenosorWait
@@ -52,6 +56,7 @@ int ValidateDigital( int digitalIn );
 // function
 //============================
 void SensorWait( int sensorNum ) {
+	ValidateInput( sensorNum );
 #ifdef NOT_ROBOTC
 	printf("SensorWait: sensorNum %d\n", sensorNum);
 	sleep( 2 );
@@ -100,68 +105,75 @@ int CapOutput( int outPower ) {
 int ValidatePort( int portNum ) {
 	if (portNum != port1 && portNum != port2 && portNum != port3 && 
 			portNum != port4 && portNum != port5 && portNum != port6) {
-		if (portNum == 1) portNum = port1;
-		else if (portNum == 2) portNum = port2;
-		else if (portNum == 3) portNum = port3;
-		else if (portNum == 4) portNum = port4;
-		else if (portNum == 5) portNum = port5;
-		else if (portNum == 6) portNum = port6;
-		else {
-			// default to motor port 1
-                	printf("WARNING: Output port number %d is invalid! Defaulting to port1\n", portNum);
-                	portNum = port1;
-		}
+		// default to motor port 1
+		printf("WARNING: Output port number %d is invalid! Defaulting to port1\n", portNum);
+		return port1;
 	}
 	return portNum; // returns a corrected port number
 }
 
 //============================
-// ValidateAnalog
+// ValidateInput
 //
-// Make sure analogIn is a valid
-// analog input, if not return
-// in1
+// Make sure inputNum is a valid
+// input, if not return in1
 //============================
-int ValidateAnalog( int analogIn ) {
-	if (analogIn != in1 && analogIn != in2 && analogIn != in3 && 
-			analogIn != in4 && analogIn != in5 && analogIn != in6) {
-		if (analogIn == 1) analogIn = in1;
-		else if (analogIn == 2) analogIn = in2;
-		else if (analogIn == 3) analogIn = in3;
-		else if (analogIn == 4) analogIn = in4;
-		else if (analogIn == 5) analogIn = in5;
-		else if (analogIn == 6) analogIn = in6;
-		else {
-                        // default to analog input 1
-                        printf("WARNING: Analog input number %d is invalid! Defaulting to in1\n", analogIn);
-                        analogIn = in1;
-                }
-	}
-	return analogIn; // returns a corrected analog number
+int ValidateInput( int inputNum ) {
+	int	i;
+
+	for (i = 0; i <= MAX_DIGITAL; i++)
+		if (inputNum == (dgtl1 + i))
+			return inputNum;
+
+	for (i = 0; i <= MAX_ANALOG; i++)
+		if (inputNum == (in1 + i))
+			return inputNum;
+
+	// if inputNum isn't valid, return in1.
+	printf("WARNING: %d is not a valid input number, defaulting inputNum to in1\n", inputNum);
+	return in1;
 }
 
 //============================
-// ValidateDigital
+// NumtoIO
 //
-// Make sure digitalIn is a valid
-// digital input, if not return
-// dgtl1
+// Convert ioNum to an output
+// of (port1 -> port6) if IO
+// is OUTPUT, or convert ioNum
+// to (in1 -> dgtl6) if IO is
+// INPUT
 //============================
-int ValidateDigital( int digitalIn ) {
-	if (digitalIn != dgtl1 && digitalIn != dgtl2 && digitalIn != dgtl3 &&      
-                        digitalIn != dgtl4 && digitalIn != dgtl5 && digitalIn != dgtl6) {
-		if (digitalIn == 1) digitalIn = dgtl1;
-		else if (digitalIn == 2) digitalIn = dgtl2;
-		else if (digitalIn == 3) digitalIn = dgtl3;
-		else if (digitalIn == 4) digitalIn = dgtl4;
-		else if (digitalIn == 5) digitalIn = dgtl5;
-		else if (digitalIn == 6) digitalIn = dgtl6;
+int NumtoIO ( int ioNum, int IO ) {
+	if ( IO == OUTPUT ) {
+		if (ioNum == 1) return port1;
+		else if (ioNum == 2) return port2;
+		else if (ioNum == 3) return port3;
+		else if (ioNum == 4) return port4;
+		else if (ioNum == 5) return port5;
+		else if (ioNum == 6) return port6;
 		else {
-			// default to digital input 1
-			printf("WARNING: Digital input number %d is invalid! Defaulting to dgtl1\n", digitalIn);
-			digitalIn = dgtl1;
-       		}
+			printf("WARNING: NumtoIO: Output port number %d is invalid! Defaulting to port1\n", ioNum);
+                	return port1;
+		}
+	} else if ( IO == INPUT ) {
+		if (ioNum == 1) return in1;
+		else if (ioNum == 2) return in2;
+		else if (ioNum == 3) return in3;
+		else if (ioNum == 4) return in4;
+		else if (ioNum == 5) return in5;
+		else if (ioNum == 6) return in6;
+		else if (ioNum == 7) return dgtl1;
+		else if (ioNum == 8) return dgtl2;
+		else if (ioNum == 9) return dgtl3;
+		else if (ioNum == 10) return dgtl4;
+		else if (ioNum == 11) return dgtl5;
+		else if (ioNum == 12) return dgtl6;
+		else {
+			printf("WARNING: NumtoIO: Input number %d is invalid! Defaulting to in1\n", ioNum);
+                        return in1;
+		}
+	} else {
+		printf("ERROR: NumtoIO: IO number %d is invalid!\n", IO);
 	}
-	return digitalIn; // returns a corrected digital number
 }
 #endif // __COMMON_C__
