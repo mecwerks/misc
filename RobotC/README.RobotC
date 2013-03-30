@@ -37,17 +37,22 @@
 		Caps the output value between 127 and -127, if not in range set to DEFAULT_SPEED.
 
 	ValidatePort(int portNum);
-		Makes sure portNum is a valid port number, if not return port1, if just a number given, try converting to port number.
+		Makes sure portNum is a valid port number, if not return port1.
 
-	ValidateAnalog(int analogIn);
-		Makes sure analogIn is a valid analog input, if not return in1, if just a number given, try converting to analog input.
+	ValidateInput(int inputNum);
+		Makes sure inputNum is a valid input, if not return in1.
 
-	ValidateDigital(int digitalIn);
-		Makes sure digitalIn is a valid digital input, if not return dgtl1, if just a number given, try converting to digital input.
+	NumtoIO(int ioNum, int IO);
+		Converts ioNum to either an output port if IO is OUTPUT or an input port if IO is INPUT.
 
 ============================================================================================================================
 
-- compatibility.h (this file has defines and functions so that source can be compiled on non-RobotC machines)
+- compatibility.h: (this file has defines and functions so that source can be compiled on non-RobotC machines)
 	Please check compatibility.h for more info.
+
+============================================================================================================================
+
+- non-RobotC.c: (Clones of RobotC functions to simulate calling the functions at run-time)
+	Please check non-RobotC.c for more info.
 
 ============================================================================================================================
